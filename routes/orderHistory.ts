@@ -31,9 +31,14 @@ export function allOrders () {
 
 export function toggleDeliveryStatus () {
   return async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id
+    if (typeof id !== 'string' || !/^[a-fA-F0-9]{24}$/.test(id)) {
+      res.status(400).json({ status: 'error', message: 'Invalid order ID' })
+      return
+    }
     const deliveryStatus = !req.body.deliveryStatus
     const eta = deliveryStatus ? '0' : '1'
-    await ordersCollection.update({ _id: req.params.id }, { $set: { delivered: deliveryStatus, eta } })
+    await ordersCollection.update({ _id: id }, { $set: { delivered: deliveryStatus, eta } })
     res.status(200).json({ status: 'success' })
   }
 }
